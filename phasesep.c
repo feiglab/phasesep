@@ -7,7 +7,11 @@
 
  initial version April 2020
 
- bioRxiv: ...
+ reference:
+ B. Dutagaci, G. Nawrocki, J. Goodluck, L. Lapidus, M. Feig:
+ Charge-Driven Phase Separation of RNA and Proteins without Disorder
+ bioRxiv(2020)
+ 
 
  compile with: 
 
