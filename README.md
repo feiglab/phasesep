@@ -7,7 +7,7 @@ charge and proteins with positive charge.
 
     g++ -O3 -o phasesep phasesep.c
 
-*** Needs: 
+*** Requirements: 
   
     radial distribution functions 
     provided are RDFs for RNA-RNA, RNA-protein, protein-protein interactions from CG simulations
@@ -48,13 +48,11 @@ charge and proteins with positive charge.
  
     1. RNA with trypsin at sufficiently high concentration:
        ./phasesep -qrna -46 -rrna 1.47 -qpos 6 -rpos 1.81 -crna 0.4 -cpos 0.3 -kappa 1.3
-
           phasesep       :[rna_mM]: 0.243405 16.25 :[pos_mM]: 0.059332 24.66 :[clusterrad_nm]: 13.27 :[volfrac]: 0.13 0.37
 
 
     2. RNA with trypsin at a concentration that is too low:     
        ./phasesep -qrna -46 -rrna 1.47 -qpos 6 -rpos 1.81 -crna 0.4 -cpos 0.05 -kappa 1.3
-
           disperse       :[rna_mM]: 0.400000  0.40 :[pos_mM]: 0.050000  0.05 :[clusterrad_nm]: 62.04 :[volfrac]: 0.00 0.00
 
 *** Citation:
