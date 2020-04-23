@@ -7,7 +7,7 @@ charge and proteins with positive charge.
 
     g++ -O3 -o phasesep phasesep.c
 
-*** Needs: 
+*** Requirements: 
   
     radial distribution functions 
     provided are RDFs for RNA-RNA, RNA-protein, protein-protein interactions from CG simulations
