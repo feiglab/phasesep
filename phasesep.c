@@ -4,14 +4,9 @@
 
  Michael Feig, Bercem Dutagaci
  Michigan State University
+ 2020
 
- initial version April 2020
-
- reference:
- B. Dutagaci, G. Nawrocki, J. Goodluck, L. Lapidus, M. Feig:
- Charge-Driven Phase Separation of RNA and Proteins without Disorder
- bioRxiv(2020)
- 
+ bioRxiv: ...
 
  compile with: 
 
@@ -30,6 +25,9 @@
     -crna <value> -cpos <value>	
     -len <value>			// system size: len*len*len
     -kappa <value>			// salt screening; typical: 0.5-2.0 
+    -fcharge <value>			// effective charge scaling; typical: 10-30 (default: 20) 
+    -abcharge <value> <value>		// alternative effective charge scaling; typical values: 4 0.15 
+    -maxvol <value>                     // maximum allowed volume fraction inside condensates
      
     -q <rnavalue> <posvalue> 		// charges
     -qrna <value> -qpos <value>
@@ -68,7 +66,9 @@ const double l10=log(10.0);
 class Parameter {
   private:
     double sig(double r) { return 2.0*r/pow(2.0,1.0/6.0); } 
-    double effcharge(double q) { return log((fabs(q)/fcharge)+1)*fcharge; }
+    double effcharge1(double q) { return log((fabs(q)/fcharge)+1)*fcharge; }
+    double effcharge2(double q) { return bcharge*sqrt(fabs(q))*log((fabs(q)/acharge)+1); }
+    double effcharge(double q) { return (chargemodel==1)?effcharge1(q):effcharge2(q); }
     double spherevolume(double r) { return 4.0*pi/3.0*r*r*r; }    
     double asign(double q) { if (q>0.001 || q<-0.001) { return q/fabs(q); } else { return 1.0; } }
     double avalue(double q) { return asign(q)*sqrt((aa*fabs(effcharge(q)))); }
@@ -91,6 +91,7 @@ class Parameter {
     double kappa;
  
     double sysvol;
+    double maxvol;
 
     double volpos;
     double volrna;
@@ -99,11 +100,18 @@ class Parameter {
     double nrscale;
 
     double fcharge;
+    double acharge;
+    double bcharge;
+
     double aa;
     double a0;
     double epsilon;
 
-    Parameter() : qpos(20.0), qrna(-75), nrna(297), npos(211), kappa(1.5), vfac(0.9999), nrscale(0.02), fcharge(20.0), aa(0.75), a0(3.0), epsilon(4.0) {
+    int chargemodel;
+
+    Parameter() : qpos(20.0), qrna(-75), nrna(297), npos(211), kappa(1.5), vfac(0.9999), nrscale(0.02), 
+                  fcharge(20.0), acharge(4.0), bcharge(0.15), chargemodel(1), maxvol(0.5), 
+                  aa(0.75), a0(3.0), epsilon(4.0) {
                   setsyslen(100.0); setrpos(3.5); setrrna(1.74); settemp(298.0); }
 
     void setsyslen(double slen) {
@@ -860,6 +868,15 @@ int main(int argc, char **argv) {
       par.epsilon=atof(argv[++i]);
     } else if (!strcmp(argv[i],"-len")) {
       par.setsyslen(atof(argv[++i]));
+    } else if (!strcmp(argv[i],"-fcharge")) {
+      par.fcharge=atof(argv[++i]);
+      par.chargemodel=1;
+    } else if (!strcmp(argv[i],"-abcharge")) {
+      par.acharge=atof(argv[++i]);
+      par.bcharge=atof(argv[++i]);
+      par.chargemodel=2;
+    } else if (!strcmp(argv[i],"-maxvol")) {
+      par.maxvol=atof(argv[++i]);
     } else if (!strcmp(argv[i],"-n")) {
       Field f(argv[++i],(char *)":");
       par.nrna=atof(f[0]);
@@ -928,7 +945,7 @@ int main(int argc, char **argv) {
     ecluster.calc(par.nrna/clustvol,par.npos/clustvol,par.nrna/effvol,par.npos/effvol,par,murnaclusterall,muposclusterall);
     double gclusterall=murnaclusterall*par.nrna+muposclusterall*par.npos;
     gclusterall+=gmixall;
-    if (gclusterall<gminclusterall && (par.volrna/(clustvol/par.nrna)+par.volpos/(clustvol/par.npos))<0.5) {
+    if (gclusterall<gminclusterall && (par.volrna/(clustvol/par.nrna)+par.volpos/(clustvol/par.npos))<par.maxvol) {
        gminclusterall=gclusterall;
        minvolclusterall=clustvol;
     }
@@ -947,7 +964,7 @@ int main(int argc, char **argv) {
 
       gclusternpzero+=gmixt;
 
-      if (gclusternpzero<gminclusternpzero && (par.volrna/(clustvol/(par.nrna-nrnpzero))+par.volpos/(clustvol/par.npos))<0.5) {
+      if (gclusternpzero<gminclusternpzero && (par.volrna/(clustvol/(par.nrna-nrnpzero))+par.volpos/(clustvol/par.npos))<par.maxvol) {
          gminclusternpzero=gclusternpzero;
          minvolclusternpzero=clustvol;
          minnrnpzero=nrnpzero;
@@ -968,7 +985,7 @@ int main(int argc, char **argv) {
 
       gclusternrzero+=gmixt;
 
-      if (gclusternrzero<gminclusternrzero && (par.volrna/(clustvol/par.nrna)+par.volpos/(clustvol/(par.npos-npnrzero)))<0.5) {
+      if (gclusternrzero<gminclusternrzero && (par.volrna/(clustvol/par.nrna)+par.volpos/(clustvol/(par.npos-npnrzero)))<par.maxvol) {
          gminclusternrzero=gclusternrzero;
          minvolclusternrzero=clustvol;
          minnpnrzero=npnrzero;
@@ -1018,7 +1035,7 @@ int main(int argc, char **argv) {
                               murna,mupos,dr,dp,gdisperse,g,par.volrna/(1.0/rhd),par.volpos/(1.0/phd),clustvol);
             }
 
-            if (g<ming && (par.volrna/(1.0/rhd)+par.volpos/(1.0/phd))<0.5) {
+            if (g<ming && (par.volrna/(1.0/rhd)+par.volpos/(1.0/phd))<par.maxvol) {
               ming=g;
               bestnr=nr;
               bestnp=np; 

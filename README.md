@@ -25,6 +25,11 @@ charge and proteins with positive charge.
       -crna <value> -cpos <value> 
       -len <value>                        // system size: len*len*len
       -kappa <value>                      // salt screening; typical: 0.5-2.0 
+
+      -fcharge <value>                    // effective charge screening parameter, model 1, typical: 10-30
+      -abcharge <value> <value>           // effective charge screening parameter, model 2, typical: 2 0.6 
+      -maxvol <value>                     // maximum allowable macromolecular volume fraction in condensate, 
+                                          // typical: 0.3-0.5
      
       -q <rnavalue> <posvalue>            // charges
       -qrna <value> -qpos <value>
@@ -55,10 +60,15 @@ charge and proteins with positive charge.
        ./phasesep -qrna -46 -rrna 1.47 -qpos 6 -rpos 1.81 -crna 0.4 -cpos 0.05 -kappa 1.3
           disperse       :[rna_mM]: 0.400000  0.40 :[pos_mM]: 0.050000  0.05 :[clusterrad_nm]: 62.04 :[volfrac]: 0.00 0.00
 
+    3. RNA with trypsin with alternative effective charge model and using a reduced maximum macromolecular volume fraction:
+       ./phasesep -qrna -46 -rrna 1.47 -qpos 6 -rpos 1.81 -crna 0.4 -cpos 0.3 -kappa 1.17 -abcharge 2.0 0.6 -maxvol 0.3
+          phasesep       :[rna_mM]: 0.306871  8.62 :[pos_mM]: 0.133601 14.98 :[clusterrad_nm]: 13.88 :[volfrac]: 0.07 0.22
+       
+
 *** Citation:
 
-    Bercem Dutagaci, Grzegorz Nawrocki, Joyce Goodluck, Lisa Lapidus, Michael Feig: 
-    Charge-Driven Phase Separation of RNA and Proteins without Disorder 
+    Bercem Dutagaci, Grzegorz Nawrocki, Joyce Goodluck, Ali Akbar Ashkarran, Charles G. Hoogstraten, Lisa Lapidus, Michael Feig: 
+    Charge-Driven Condensation of RNA and Proteins Suggests Broad Role of Phase Separation in Cytoplasmic Environments
     bioRxiv(2020)
 
 
